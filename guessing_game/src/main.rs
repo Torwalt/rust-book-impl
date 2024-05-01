@@ -16,7 +16,7 @@ fn main() {
             .read_line(&mut guess)
             .expect("Failed to read input");
 
-        let guess: u32 = match guess.trim().parse::<u32>() {
+        let guess = match guess.trim().parse::<u32>() {
             Ok(num) => num,
             Err(_) => {
                 println!("Input must be a positive number!");
