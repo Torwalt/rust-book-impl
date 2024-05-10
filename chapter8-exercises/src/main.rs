@@ -1,5 +1,6 @@
 use crate::{pig::to_pig_latin, stats::median_and_mode};
 
+mod department;
 mod pig;
 mod stats;
 
@@ -11,10 +12,33 @@ fn main() {
 
     let piggy = to_pig_latin(String::from("My Name, is Alex."));
     println!("As piglatin: {}", piggy);
-}
 
-// TODO:
-// Using a hash map and vectors, create a text interface to allow a user to add employee names to
-// a department in a company. For example, “Add Sally to Engineering” or “Add Amir to Sales.”
-// Then let the user retrieve a list of all people in a department or all people in the company by
-// department, sorted alphabetically.
+    let mut comp = department::Company::new();
+    comp.add_to_department(
+        department::Employee::new("Alex"),
+        department::DepartmentType::Engineering,
+    );
+    comp.add_to_department(
+        department::Employee::new("Shmalex"),
+        department::DepartmentType::Engineering,
+    );
+    comp.add_to_department(
+        department::Employee::new("Annika"),
+        department::DepartmentType::HumanResources,
+    );
+    comp.add_to_department(
+        department::Employee::new("Sale-ormoon"),
+        department::DepartmentType::Sales,
+    );
+
+    let engineering_dep = comp.list_department(&department::DepartmentType::Engineering);
+    println!("{:?}", engineering_dep);
+
+    let departments = comp.list_company();
+    for d in departments {
+        println!("Department: {:?}", d.t);
+        for e in &d.staff {
+            println!("Employee: {}", e.name);
+        }
+    }
+}
