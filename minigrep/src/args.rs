@@ -5,8 +5,8 @@ const MATCH_EXPRESSION: &str = "-expression";
 
 #[derive(Debug, PartialEq)]
 pub struct Args {
-    pub fp: String,
-    pub me: String,
+    pub file_path: String,
+    pub match_expression: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -27,11 +27,11 @@ impl Display for Error {
 impl Args {
     pub fn new(raw: Vec<String>) -> Result<Args, Error> {
         let args = Args::build(raw);
-        if args.fp.is_empty() {
+        if args.file_path.is_empty() {
             return Err(Error::FilePathMissingErr);
         }
 
-        if args.me.is_empty() {
+        if args.match_expression.is_empty() {
             return Err(Error::ExpressionMissingErr);
         }
 
@@ -40,8 +40,8 @@ impl Args {
 
     fn build(raw: Vec<String>) -> Args {
         let mut args = Args {
-            fp: String::new(),
-            me: String::new(),
+            file_path: String::new(),
+            match_expression: String::new(),
         };
 
         let mut arg_iter = raw.iter();
@@ -52,12 +52,12 @@ impl Args {
                 Some(arg) => match arg.as_str() {
                     FILE_PATH => {
                         let v = arg_iter.next();
-                        args.fp = v.unwrap_or(&String::new()).clone();
+                        args.file_path = v.unwrap_or(&String::new()).clone();
                     }
 
                     MATCH_EXPRESSION => {
                         let v = arg_iter.next();
-                        args.me = v.unwrap_or(&String::new()).clone();
+                        args.match_expression = v.unwrap_or(&String::new()).clone();
                     }
 
                     _ => {
@@ -86,8 +86,8 @@ mod tests {
         ];
         let args = Args::new(correct_input);
         let expected_args = Args {
-            fp: file_path.clone(),
-            me: default_expression.clone(),
+            file_path: file_path.clone(),
+            match_expression: default_expression.clone(),
         };
 
         assert_eq!(args.unwrap(), expected_args);
@@ -102,8 +102,8 @@ mod tests {
         ];
         let args = Args::new(different_order_arg_input);
         let expected_args = Args {
-            fp: file_path.clone(),
-            me: default_expression.clone(),
+            file_path: file_path.clone(),
+            match_expression: default_expression.clone(),
         };
 
         assert_eq!(args.unwrap(), expected_args);
