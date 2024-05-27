@@ -43,7 +43,7 @@ impl User {
         println!("{0}", self.name,)
     }
 
-    fn set_name(&mut self, name: String ) {
+    fn set_name(&mut self, name: String) {
         self.name = name;
     }
 }
