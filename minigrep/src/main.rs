@@ -1,4 +1,6 @@
 use std::env;
+use std::fs;
+use std::process;
 
 static FILE_PATH: &str = "-file_path";
 
@@ -30,9 +32,26 @@ impl Args {
 fn main() {
     let args_raw: Vec<String> = env::args().collect();
 
+    let args_raw = dbg!(args_raw);
+
     let args = Args::new(args_raw);
 
-    println!("{:?}", args)
+    if args.fp == String::new() {
+        println!("No filepath given.");
+        process::exit(1);
+    }
+
+    let args = dbg!(args);
+
+    let file_contents = match fs::read_to_string(&args.fp) {
+        Ok(file) => file,
+        Err(err) => {
+            println!("Could not open file at {}: {}", &args.fp, err);
+            process::exit(1);
+        }
+    };
+
+    let file_contents = dbg!(file_contents);
 }
 
 #[cfg(test)]
