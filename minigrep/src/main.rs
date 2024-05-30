@@ -1,9 +1,9 @@
-use regex::Regex;
 use std::env;
 use std::fs;
 use std::process;
 
 mod args;
+mod search;
 
 fn main() {
     let args_raw: Vec<String> = env::args().collect();
@@ -13,7 +13,7 @@ fn main() {
         process::exit(1);
     });
 
-    println!("Searching for {}", args.match_expression);
+    println!("Searching for {}", args.word_search);
     println!("In File {}", args.file_path);
 
     let file_contents = fs::read_to_string(&args.file_path).unwrap_or_else(|err| {
@@ -21,18 +21,6 @@ fn main() {
         process::exit(1);
     });
 
-    let regex_parsed = Regex::new(&args.match_expression).unwrap_or_else(|err| {
-        println!(
-            "Could not process expression {}: {}",
-            &args.match_expression, err
-        );
-        process::exit(1);
-    });
-
-    let found: Vec<&str> = regex_parsed
-        .find_iter(&file_contents)
-        .map(|m| m.as_str())
-        .collect();
-
+    let found = search::lines_containing_search(&args.word_search, &file_contents);
     dbg!(found);
 }

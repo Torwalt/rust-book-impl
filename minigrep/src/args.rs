@@ -1,12 +1,12 @@
 use std::{fmt::Display, result::Result};
 
 const FILE_PATH: &str = "-file_path";
-const MATCH_EXPRESSION: &str = "-expression";
+const WORD_SEARCH: &str = "-word_search";
 
 #[derive(Debug, PartialEq)]
 pub struct Args {
     pub file_path: String,
-    pub match_expression: String,
+    pub word_search: String,
 }
 
 #[derive(Debug, PartialEq)]
@@ -31,7 +31,7 @@ impl Args {
             return Err(Error::FilePathMissingErr);
         }
 
-        if args.match_expression.is_empty() {
+        if args.word_search.is_empty() {
             return Err(Error::ExpressionMissingErr);
         }
 
@@ -41,7 +41,7 @@ impl Args {
     fn build(raw: Vec<String>) -> Args {
         let mut args = Args {
             file_path: String::new(),
-            match_expression: String::new(),
+            word_search: String::new(),
         };
 
         let mut arg_iter = raw.iter();
@@ -55,9 +55,9 @@ impl Args {
                         args.file_path = v.unwrap_or(&String::new()).clone();
                     }
 
-                    MATCH_EXPRESSION => {
+                    WORD_SEARCH => {
                         let v = arg_iter.next();
-                        args.match_expression = v.unwrap_or(&String::new()).clone();
+                        args.word_search = v.unwrap_or(&String::new()).clone();
                     }
 
                     _ => {
@@ -81,19 +81,19 @@ mod tests {
             String::from("target/debug/minigrep"),
             String::from(FILE_PATH),
             file_path.clone(),
-            String::from(MATCH_EXPRESSION),
+            String::from(WORD_SEARCH),
             default_expression.clone(),
         ];
         let args = Args::new(correct_input);
         let expected_args = Args {
             file_path: file_path.clone(),
-            match_expression: default_expression.clone(),
+            word_search: default_expression.clone(),
         };
 
         assert_eq!(args.unwrap(), expected_args);
 
         let different_order_arg_input: Vec<String> = vec![
-            String::from(MATCH_EXPRESSION),
+            String::from(WORD_SEARCH),
             default_expression.clone(),
             String::from("something else"),
             String::from("-file_path"),
@@ -103,7 +103,7 @@ mod tests {
         let args = Args::new(different_order_arg_input);
         let expected_args = Args {
             file_path: file_path.clone(),
-            match_expression: default_expression.clone(),
+            word_search: default_expression.clone(),
         };
 
         assert_eq!(args.unwrap(), expected_args);
