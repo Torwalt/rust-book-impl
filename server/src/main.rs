@@ -1,3 +1,4 @@
+use server::Threadpool;
 use std::io::{self, ErrorKind};
 use std::time::Duration;
 use std::{fs, thread};
@@ -15,11 +16,12 @@ const ERR: &str = "GET /testerr HTTP/1.1";
 
 fn main() -> Result<()> {
     let listener = TcpListener::bind(ADDR)?;
+    let pool = Threadpool::new(4);
 
     for stream in listener.incoming() {
         match stream {
             Ok(s) => {
-                thread::spawn(|| match handle_connection(s) {
+                pool.execute(|| match handle_connection(s) {
                     Ok(_) => {}
                     Err(e) => {
                         println!("Error on handle connection: {}", e);
