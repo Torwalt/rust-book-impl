@@ -1,9 +1,10 @@
 use server::Threadpool;
+use std::error::Error;
 use std::io::{self, ErrorKind};
 use std::time::Duration;
 use std::{fs, thread};
 use std::{
-    io::{BufRead, BufReader, Result, Write},
+    io::{BufRead, BufReader, Write},
     net::{TcpListener, TcpStream},
 };
 
@@ -14,22 +15,27 @@ const GET_ROOT: &str = "GET / HTTP/1.1";
 const SLEEP: &str = "GET /sleep HTTP/1.1";
 const ERR: &str = "GET /testerr HTTP/1.1";
 
-fn main() -> Result<()> {
+fn main() -> Result<(), Box<dyn Error>> {
     let listener = TcpListener::bind(ADDR)?;
-    let pool = Threadpool::new(4);
+    let pool = Threadpool::new(4)?;
 
     for stream in listener.incoming() {
         match stream {
             Ok(s) => {
-                pool.execute(|| match handle_connection(s) {
+                match pool.execute(|| match handle_connection(s) {
                     Ok(_) => {}
                     Err(e) => {
-                        println!("Error on handle connection: {}", e);
+                        println!("Error on handle connection: {e}");
                     }
-                });
+                }) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        println!("Error executing thread: {e}");
+                    }
+                };
             }
             Err(e) => {
-                println!("Connection failed: {}", e);
+                println!("Connection failed: {e}");
             }
         }
     }
@@ -37,10 +43,10 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn handle_connection(mut s: TcpStream) -> Result<()> {
+fn handle_connection(mut s: TcpStream) -> std::io::Result<()> {
     let buf = BufReader::new(&mut s);
 
-    let maybe_req: Result<Vec<_>> = buf
+    let maybe_req: std::io::Result<Vec<_>> = buf
         .lines()
         .take_while(|result| match result {
             Ok(line) => !line.is_empty(),
@@ -71,15 +77,15 @@ fn handle_connection(mut s: TcpStream) -> Result<()> {
     }
 }
 
-fn respond_not_found(s: TcpStream) -> Result<()> {
+fn respond_not_found(s: TcpStream) -> std::io::Result<()> {
     return respond_html(s, "404.html");
 }
 
-fn respond_root(s: TcpStream) -> Result<()> {
+fn respond_root(s: TcpStream) -> std::io::Result<()> {
     return respond_html(s, "hello.html");
 }
 
-fn respond_html(mut s: TcpStream, file_path: &str) -> Result<()> {
+fn respond_html(mut s: TcpStream, file_path: &str) -> std::io::Result<()> {
     let cnt = fs::read_to_string(file_path)?;
     let len = cnt.len();
     let resp = format!("{STATUS_OK}\r\nContent-Length: {len}\r\n\r\n{cnt}");
